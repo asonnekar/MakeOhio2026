@@ -1,0 +1,13 @@
+{
+  "name": "smartline-serial-bridge",
+  "version": "1.0.0",
+  "description": "Serial bridge: reads ESP32 UART and serves JSON at /api/status",
+  "main": "serial-bridge.js",
+  "scripts": {
+    "start": "node serial-bridge.js"
+  },
+  "dependencies": {
+    "@serialport/parser-readline": "^12.0.0",
+    "serialport": "^12.0.0"
+  }
+}
