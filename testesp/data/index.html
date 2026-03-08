@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grid Monitor Dashboard</title>
+  <style>
+    :root {
+      --bg: #f3efe5;
+      --panel: rgba(255, 250, 240, 0.92);
+      --ink: #16202a;
+      --muted: #5a6570;
+      --safe: #1f9d55;
+      --stressed: #f08c00;
+      --overload: #d64545;
+      --shadow: 0 24px 60px rgba(18, 32, 42, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(31, 157, 85, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(240, 140, 0, 0.22), transparent 24%),
+        linear-gradient(135deg, #f6f1e7 0%, #ded6c8 100%);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .dashboard {
+      width: min(1040px, 100%);
+      background: var(--panel);
+      border: 1px solid rgba(22, 32, 42, 0.08);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+
+    .hero {
+      padding: 28px 28px 18px;
+      background: linear-gradient(135deg, rgba(22, 32, 42, 0.96), rgba(38, 57, 72, 0.9));
+      color: #f8f3eb;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 0.82rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(248, 243, 235, 0.72);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 0.95;
+    }
+
+    .hero-row {
+      margin-top: 18px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .timestamp {
+      color: rgba(248, 243, 235, 0.8);
+      font-size: 0.98rem;
+    }
+
+    .status-pill {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .status-safe {
+      background: var(--safe);
+    }
+
+    .status-stressed {
+      background: var(--stressed);
+    }
+
+    .status-overload {
+      background: var(--overload);
+    }
+
+    .content {
+      padding: 24px;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(22, 32, 42, 0.08);
+      border-radius: 22px;
+      padding: 20px;
+    }
+
+    .label {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .value {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .unit {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+
+    .note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.45;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .legend-chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .placeholder {
+      color: #7a8792;
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        padding: 24px 20px 16px;
+      }
+
+      .content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <section class="hero">
+      <p class="eyebrow">Dynamic Grid Challenge</p>
+      <h1>Live Conductor Health</h1>
+      <div class="hero-row">
+        <div class="timestamp" id="lastUpdated">Waiting for sensor feed</div>
+        <div class="status-pill status-safe" id="statusBadge">SAFE</div>
+      </div>
+    </section>
+
+    <section class="content">
+      <article class="card">
+        <p class="label">Ambient Temperature</p>
+        <p class="value"><span id="ambientTemp">24.6</span><span class="unit">C</span></p>
+        <div class="note">General air temperature near the monitored area.</div>
+      </article>
+
+      <article class="card">
+        <p class="label">Humidity</p>
+        <p class="value"><span id="humidity" class="placeholder">--</span><span class="unit">%</span></p>
+        <div class="note">Reserved for humidity once that sensor is connected.</div>
+      </article>
+
+      <article class="card">
+        <p class="label">Conductor Temperature</p>
+        <p class="value"><span id="conductorTemp">31.2</span><span class="unit">C</span></p>
+        <div class="note">Primary conductor thermal reading from the line sensor.</div>
+      </article>
+
+      <article class="card">
+        <p class="label">System Status</p>
+        <p class="value" id="statusText">SAFE</p>
+        <div class="note" id="statusMessage">Operating in a normal range.</div>
+      </article>
+
+      <article class="card full">
+        <p class="label">Status Guide</p>
+        <div class="legend">
+          <span class="legend-chip status-safe">SAFE</span>
+          <span class="legend-chip status-stressed">STRESSED</span>
+          <span class="legend-chip status-overload">OVERLOAD</span>
+        </div>
+        <div class="note">
+          The page already includes placeholders for every value your judges or users need to see.
+          When your sensor code is ready, update the dashboard by calling
+          <code>updateReadings({ ambientTemp, humidity, conductorTemp, status })</code>.
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const STATUS_CLASSES = {
+      SAFE: "status-safe",
+      STRESSED: "status-stressed",
+      OVERLOAD: "status-overload"
+    };
+
+    const STATUS_MESSAGES = {
+      SAFE: "Operating in a normal range.",
+      STRESSED: "Approaching a thermal or environmental limit.",
+      OVERLOAD: "Immediate attention recommended."
+    };
+
+    function setStatus(status) {
+      const normalized = STATUS_CLASSES[status] ? status : "SAFE";
+      const badge = document.getElementById("statusBadge");
+      const statusText = document.getElementById("statusText");
+      const statusMessage = document.getElementById("statusMessage");
+
+      badge.className = "status-pill " + STATUS_CLASSES[normalized];
+      badge.textContent = normalized;
+      statusText.textContent = normalized;
+      statusMessage.textContent = STATUS_MESSAGES[normalized];
+    }
+
+    function formatValue(value, decimals) {
+      if (value === null || value === undefined || value === "") {
+        return "--";
+      }
+
+      const parsed = Number(value);
+      if (Number.isNaN(parsed)) {
+        return "--";
+      }
+
+      return parsed.toFixed(decimals);
+    }
+
+    function setTimestamp() {
+      document.getElementById("lastUpdated").textContent =
+        "Last updated " + new Date().toLocaleTimeString();
+    }
+
+    window.updateReadings = function updateReadings(data) {
+      document.getElementById("ambientTemp").textContent = formatValue(data.ambientTemp, 1);
+      document.getElementById("humidity").textContent = formatValue(data.humidity, 0);
+      document.getElementById("conductorTemp").textContent = formatValue(data.conductorTemp, 1);
+      setStatus(data.status);
+      setTimestamp();
+    };
+
+    updateReadings({
+      ambientTemp: 24.6,
+      humidity: null,
+      conductorTemp: 31.2,
+      status: "SAFE"
+    });
+  </script>
+</body>
+</html>
