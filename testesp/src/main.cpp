@@ -1,9 +1,9 @@
 #include <Arduino.h>
-#include <math.h>
 #include <DHT.h>
+#include <math.h>
 
 #ifndef LED_BUILTIN
-  #define LED_BUILTIN 2
+#define LED_BUILTIN 2
 #endif
 
 #define DHTPIN 14
@@ -13,10 +13,10 @@ DHT dht(DHTPIN, DHTTYPE);
 
 const int THERM_PIN = 34;
 
-const float SERIES_RESISTOR = 10000.0f;      // 10k resistor to GND
-const float NOMINAL_RESISTANCE = 10000.0f;   // 10k thermistor at 25 C
-const float NOMINAL_TEMPERATURE = 25.0f;     // 25 C
-const float BETA_COEFFICIENT = 3950.0f;      // Beta value
+const float SERIES_RESISTOR = 10000.0f;
+const float NOMINAL_RESISTANCE = 10000.0f;
+const float NOMINAL_TEMPERATURE = 25.0f;
+const float BETA_COEFFICIENT = 3950.0f;
 const float ADC_MAX = 4095.0f;
 const float VCC = 3.3f;
 
@@ -24,11 +24,7 @@ const int LED_SAFE = 25;
 const int LED_STRESS = 26;
 const int LED_OVERLOAD = 27;
 
-enum Status {
-  STATUS_SAFE,
-  STATUS_STRESSED,
-  STATUS_OVERLOAD
-};
+enum Status { STATUS_SAFE, STATUS_STRESSED, STATUS_OVERLOAD };
 
 struct SensorReadings {
   int conductorRaw;
@@ -44,47 +40,35 @@ struct StatusDecision {
 };
 
 float clamp01(float value) {
-  if (value < 0.0f) {
+  if (value < 0.0f)
     return 0.0f;
-  }
-
-  if (value > 1.0f) {
+  if (value > 1.0f)
     return 1.0f;
-  }
-
   return value;
 }
 
 int readAverageAdc(uint8_t samples = 8) {
   long total = 0;
-
   for (uint8_t i = 0; i < samples; i++) {
     total += analogRead(THERM_PIN);
     delay(5);
   }
-
   return total / samples;
 }
 
 float readThermistorC(int adc) {
-  if (adc <= 0 || adc >= ADC_MAX) {
+  if (adc <= 0 || adc >= ADC_MAX)
     return NAN;
-  }
-
   const float voltage = (adc / ADC_MAX) * VCC;
-  if (voltage <= 0.0f || voltage >= VCC) {
+  if (voltage <= 0.0f || voltage >= VCC)
     return NAN;
-  }
-
   const float rTherm = SERIES_RESISTOR * (VCC / voltage - 1.0f);
-  if (rTherm <= 0.0f) {
+  if (rTherm <= 0.0f)
     return NAN;
-  }
-
   const float t0 = NOMINAL_TEMPERATURE + 273.15f;
-  const float invT = (1.0f / t0) + (1.0f / BETA_COEFFICIENT) * log(rTherm / NOMINAL_RESISTANCE);
-  const float tempK = 1.0f / invT;
-  return tempK - 273.15f;
+  const float invT = (1.0f / t0) + (1.0f / BETA_COEFFICIENT) *
+                                       log(rTherm / NOMINAL_RESISTANCE);
+  return (1.0f / invT) - 273.15f;
 }
 
 SensorReadings readSensors() {
@@ -97,12 +81,8 @@ SensorReadings readSensors() {
 }
 
 float computeHumidityCoolingFactor(float humidityPercent) {
-  if (isnan(humidityPercent)) {
+  if (isnan(humidityPercent))
     return 1.0f;
-  }
-
-  // Project notes indicate humidity matters less than ambient temperature
-  // and only changes cooling slightly.
   const float normalizedHumidity = (humidityPercent - 50.0f) / 50.0f;
   return 1.0f + normalizedHumidity * 0.06f;
 }
@@ -110,64 +90,99 @@ float computeHumidityCoolingFactor(float humidityPercent) {
 StatusDecision evaluateStatus(const SensorReadings &readings) {
   StatusDecision decision = {STATUS_OVERLOAD, 100.0f, NAN};
 
-  if (isnan(readings.conductorTempC) || isnan(readings.ambientTempC) || isnan(readings.humidityPercent)) {
+  if (isnan(readings.conductorTempC) || isnan(readings.ambientTempC) ||
+      isnan(readings.humidityPercent))
     return decision;
-  }
 
-  const float humidityCoolingFactor = computeHumidityCoolingFactor(readings.humidityPercent);
-  const float conductorRiseC = max(0.0f, readings.conductorTempC - readings.ambientTempC);
+  const float humidityCoolingFactor =
+      computeHumidityCoolingFactor(readings.humidityPercent);
+  const float conductorRiseC =
+      max(0.0f, readings.conductorTempC - readings.ambientTempC);
+  const float effectiveConductorTempC =
+      readings.ambientTempC + conductorRiseC / humidityCoolingFactor;
+  // ── Risk scoring recalibrated for demo hardware ─────────────────────────
+  // Observed range: Tc 15–37 °C, Ta ~27 °C, rise up to ~10 °C.
+  // conductorScore: starts at 28 °C effective, maxes at 40 °C
+  // ambientScore:   starts at 24 °C, maxes at 32 °C
+  // thermalRise:    starts at 3 °C rise above ambient, maxes at 13 °C
+  const float conductorScore =
+      clamp01((effectiveConductorTempC - 28.0f) / 12.0f);
+  const float ambientScore = clamp01((readings.ambientTempC - 24.0f) / 8.0f);
+  const float thermalRiseScore = clamp01((conductorRiseC - 3.0f) / 10.0f);
 
-  // Hot ambient air reduces cooling more than humidity can improve it.
-  const float effectiveConductorTempC = readings.ambientTempC + conductorRiseC / humidityCoolingFactor;
-  const float conductorScore = clamp01((effectiveConductorTempC - 45.0f) / 20.0f);
-  const float ambientScore = clamp01((readings.ambientTempC - 25.0f) / 15.0f);
-  const float thermalRiseScore = clamp01((conductorRiseC - 18.0f) / 22.0f);
+  float riskScore = 100.0f * (conductorScore * 0.60f + ambientScore * 0.15f +
+                              thermalRiseScore * 0.25f);
 
-  float riskScore = 100.0f * (
-    conductorScore * 0.65f +
-    ambientScore * 0.25f +
-    thermalRiseScore * 0.10f
-  );
-
-  if (readings.humidityPercent < 35.0f) {
+  if (readings.humidityPercent < 35.0f)
     riskScore += 3.0f;
-  } else if (readings.humidityPercent > 75.0f) {
+  else if (readings.humidityPercent > 75.0f)
     riskScore -= 2.0f;
-  }
-
-  if (riskScore < 0.0f) {
+  if (riskScore < 0.0f)
     riskScore = 0.0f;
+
+  // ── Hysteresis thresholds ─────────────────────────────────────────────────
+  // Each state has separate ENTER (higher) and EXIT (lower) thresholds so the
+  // status does not flip-flop at the boundary.
+  //
+  // Entering STRESSED:  Tc ≥ 32 °C  OR  rise ≥  6 °C  OR  risk ≥ 32
+  // Exiting  STRESSED:  Tc <  29 °C AND  rise <  3.5°C AND  risk <  24
+  //
+  // Entering OVERLOAD:  Tc ≥ 37 °C  OR  rise ≥ 10.5°C OR  risk ≥ 66
+  // Exiting  OVERLOAD:  Tc <  33 °C AND  rise <  7.5°C AND  risk <  55
+
+  static Status prevStatus = STATUS_SAFE; // remembered across loop() calls
+
+  const bool enterStressed =
+      (readings.conductorTempC >= 32.0f || effectiveConductorTempC >= 30.5f ||
+       conductorRiseC >= 6.0f || riskScore >= 32.0f);
+
+  const bool exitStressed =
+      (readings.conductorTempC < 29.0f && effectiveConductorTempC < 28.5f &&
+       conductorRiseC < 3.5f && riskScore < 24.0f);
+
+  const bool enterOverload =
+      (readings.conductorTempC >= 37.0f || effectiveConductorTempC >= 35.0f ||
+       conductorRiseC >= 10.5f || riskScore >= 66.0f);
+
+  const bool exitOverload =
+      (readings.conductorTempC < 33.0f && effectiveConductorTempC < 32.0f &&
+       conductorRiseC < 7.5f && riskScore < 55.0f);
+
+  switch (prevStatus) {
+  case STATUS_SAFE:
+    if (enterOverload)
+      prevStatus = STATUS_OVERLOAD;
+    else if (enterStressed)
+      prevStatus = STATUS_STRESSED;
+    break;
+  case STATUS_STRESSED:
+    if (enterOverload)
+      prevStatus = STATUS_OVERLOAD;
+    else if (exitStressed)
+      prevStatus = STATUS_SAFE;
+    break;
+  case STATUS_OVERLOAD:
+    if (exitOverload)
+      prevStatus = STATUS_STRESSED;
+    // (require another exitStressed before going all the way back to SAFE)
+    break;
   }
 
-  if (
-    readings.conductorTempC >= 70.0f ||
-    effectiveConductorTempC >= 65.0f ||
-    riskScore >= 80.0f
-  ) {
-    decision.status = STATUS_OVERLOAD;
-  } else if (
-    readings.conductorTempC >= 55.0f ||
-    effectiveConductorTempC >= 52.0f ||
-    riskScore >= 45.0f
-  ) {
-    decision.status = STATUS_STRESSED;
-  } else {
-    decision.status = STATUS_SAFE;
-  }
+  decision.status = prevStatus;
 
   decision.riskScore = riskScore;
   decision.effectiveConductorTempC = effectiveConductorTempC;
   return decision;
 }
 
-const char* statusToText(Status status) {
+const char *statusToText(Status status) {
   switch (status) {
-    case STATUS_SAFE:
-      return "SAFE";
-    case STATUS_STRESSED:
-      return "STRESSED";
-    default:
-      return "OVERLOAD";
+  case STATUS_SAFE:
+    return "SAFE";
+  case STATUS_STRESSED:
+    return "STRESSED";
+  default:
+    return "OVERLOAD";
   }
 }
 
@@ -192,7 +207,7 @@ void setup() {
   dht.begin();
 
   Serial.println("Conductor monitor starting...");
-  Serial.println("Status now uses conductor temp, ambient temp, and humidity.");
+  Serial.println("Status uses conductor temp, ambient temp, and humidity.");
 }
 
 void loop() {
