@@ -1,0 +1,110 @@
+.trend-chart {}
+
+.trend-chart__legend {
+    display: flex;
+    gap: 14px;
+}
+
+.trend-chart__key {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.trend-chart__key::before {
+    content: '';
+    width: 16px;
+    height: 2.5px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+.trend-chart__key--tc {
+    color: var(--red);
+}
+
+.trend-chart__key--tc::before {
+    background: var(--red);
+}
+
+.trend-chart__key--ta {
+    color: var(--gray-400);
+}
+
+.trend-chart__key--ta::before {
+    background: var(--gray-400);
+}
+
+.trend-chart__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 12px;
+}
+
+.trend-chart__waiting {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 500;
+}
+
+.trend-chart__footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--gray-400);
+    padding-top: 2px;
+    border-top: 1px solid var(--gray-150);
+}
+
+/* ── Custom tooltip ── */
+.chart-tooltip {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--r-sm);
+    padding: 8px 12px;
+    box-shadow: var(--shadow-md);
+    font-size: 11px;
+}
+
+.chart-tooltip__time {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--gray-400);
+    margin-bottom: 5px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--gray-150);
+}
+
+.chart-tooltip__row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+}
+
+.chart-tooltip__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.chart-tooltip__key {
+    color: var(--gray-500);
+    width: 70px;
+}
+
+.chart-tooltip__val {
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--gray-800);
+}

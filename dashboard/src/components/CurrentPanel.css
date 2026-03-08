@@ -1,0 +1,295 @@
+.cp-tag {
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--mono);
+    padding: 2px 8px;
+    border-radius: 99px;
+    letter-spacing: 0.06em;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.40);
+}
+
+.cp-tag--safe {
+    color: rgba(255, 255, 255, 0.40);
+}
+
+.cp-tag--stressed {
+    color: rgba(255, 255, 255, 0.40);
+}
+
+.cp-tag--overload {
+    color: rgba(255, 255, 255, 0.40);
+}
+
+
+/* ── Primary readout ── */
+.cp-primary {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px 0 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    margin-bottom: 16px;
+}
+
+.cp-primary__div {
+    width: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0 20px;
+    align-self: stretch;
+}
+
+.cp-primary__block {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cp-primary__label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.40);
+}
+
+.cp-primary__val {
+    font-family: var(--mono);
+    font-size: 44px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    transition: color .35s;
+}
+
+.cp-primary__val--muted {
+    color: var(--gray-300) !important;
+}
+
+.cp-primary__unit {
+    font-size: 18px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.30);
+    margin-left: 1px;
+}
+
+/* ── Gauge ── */
+.cp-gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cp-gauge-labels-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.40);
+    font-family: var(--mono);
+}
+
+.cp-gauge-labels-top strong {
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 700;
+}
+
+.cp-gauge-track {
+    height: 28px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 5px;
+    position: relative;
+    overflow: visible;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Background zones */
+.cp-gauge-zone {
+    position: absolute;
+    height: 100%;
+    top: 0;
+}
+
+.cp-gauge-zone--safe {
+    background: rgba(22, 163, 74, .05);
+    left: 0;
+    border-radius: 5px 0 0 5px;
+}
+
+.cp-gauge-zone--over {
+    background: rgba(200, 16, 46, .04);
+    border-radius: 0 5px 5px 0;
+}
+
+.cp-gauge-fill {
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 5px;
+    transition: width .55s cubic-bezier(.34, 1.4, .64, 1), background .4s;
+    z-index: 1;
+}
+
+.cp-gauge-overflow {
+    position: absolute;
+    left: 66.7%;
+    top: 0;
+    height: 100%;
+    background: repeating-linear-gradient(45deg,
+            rgba(200, 16, 46, .75), rgba(200, 16, 46, .75) 3px,
+            rgba(200, 16, 46, .2) 3px, rgba(200, 16, 46, .2) 6px);
+    z-index: 2;
+    border-radius: 0 5px 5px 0;
+    transition: width .5s ease;
+}
+
+/* Limit marker */
+.cp-gauge-marker {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 3;
+    transform: translateX(-50%);
+}
+
+.cp-gauge-marker-line {
+    width: 2px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 1px;
+}
+
+.cp-gauge-marker-label {
+    position: absolute;
+    bottom: -18px;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.45);
+    font-family: var(--mono);
+    white-space: nowrap;
+}
+
+/* Tracking dot */
+.cp-gauge-cur {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    border: 2px solid white;
+    box-shadow: var(--shadow-sm);
+    transition: left .55s cubic-bezier(.34, 1.4, .64, 1), background .4s;
+}
+
+.cp-gauge-cur--safe {
+    background: var(--safe);
+}
+
+.cp-gauge-cur--stressed {
+    background: var(--warn);
+}
+
+.cp-gauge-cur--overload {
+    background: var(--red);
+}
+
+.cp-gauge-legend {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.40);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.cp-gauge-legend__item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cp-gauge-legend__item::before {
+    content: '';
+    width: 10px;
+    height: 3px;
+    border-radius: 2px;
+}
+
+.cp-gauge-legend__item--safe::before {
+    background: var(--safe);
+}
+
+.cp-gauge-legend__item--over::before {
+    background: var(--red);
+}
+
+/* ── Meta row ── */
+.cp-meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.cp-meta__item {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--r-sm);
+    padding: 9px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.cp-meta__label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.40);
+}
+
+.cp-meta__val {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.88);
+    transition: color .3s;
+}
+
+/* ── Insight box ── */
+.cp-insight {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: rgba(0, 0, 0, 0.30);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--r-sm);
+    padding: 11px 14px;
+    margin-top: 12px;
+}
+
+.cp-insight__bar {
+    width: 3px;
+    border-radius: 2px;
+    align-self: stretch;
+    min-height: 16px;
+    flex-shrink: 0;
+    transition: background .4s;
+}
+
+.cp-insight__text {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.55;
+}

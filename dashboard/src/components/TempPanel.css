@@ -1,0 +1,134 @@
+.temp-panel {}
+
+.tp-sensor {
+    font-size: 10px;
+    color: var(--gray-400);
+    font-family: var(--mono);
+}
+
+/* ── Rings row ── */
+.tp-rings {
+    display: flex;
+    justify-content: space-around;
+    gap: 12px;
+}
+
+.ring-gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    position: relative;
+}
+
+.ring-gauge__svg {
+    width: 120px;
+    height: 120px;
+}
+
+.ring-gauge__track {
+    fill: none;
+    stroke: var(--gray-150);
+    stroke-width: 7;
+}
+
+.ring-gauge__fill {
+    fill: none;
+    stroke-width: 7;
+    transition: stroke-dasharray .65s cubic-bezier(.34, 1.2, .64, 1);
+}
+
+.ring-gauge__center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -72%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ring-gauge__value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gray-800);
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.ring-gauge__unit {
+    font-size: 11px;
+    color: var(--gray-400);
+    font-weight: 500;
+}
+
+.ring-gauge__label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gray-500);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: 2px;
+}
+
+/* ── Delta ── */
+.tp-delta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-150);
+    border-radius: var(--r-md);
+    padding: 12px 16px;
+}
+
+.tp-delta__label {
+    font-size: 11px;
+    color: var(--gray-400);
+    font-weight: 600;
+}
+
+.tp-delta__value {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--red);
+    letter-spacing: -0.03em;
+}
+
+/* ── Risk bar ── */
+.tp-risk-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-500);
+    margin-bottom: 6px;
+}
+
+.tp-risk-track {
+    height: 8px;
+    background: var(--gray-150);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.tp-risk-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .6s ease, background .4s ease;
+}
+
+.tp-risk-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--gray-400);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}

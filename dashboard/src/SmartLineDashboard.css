@@ -1,0 +1,337 @@
+/* ── Outer shell ── */
+.dashboard {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #0d0d10;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ── Hide scrollbar everywhere ── */
+.dashboard,
+.dashboard * {
+    scrollbar-width: none;
+}
+
+.dashboard ::-webkit-scrollbar,
+.dashboard::-webkit-scrollbar {
+    display: none;
+}
+
+/* ───────────────────────────────────────────────────────────
+   Ambient aurora orbs — fixed behind everything, z-index:-1
+   Each orb is a huge soft radial-gradient ellipse that drifts
+   and breathes on its own cycle.
+─────────────────────────────────────────────────────────── */
+.dash-bg {
+    display: block;
+    /* re-enable */
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.dash-bg__wave {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform;
+    filter: blur(60px);
+}
+
+/* Orb 1 — AEP red glow, top-left, large */
+.dash-bg__wave--1 {
+    width: 70vw;
+    height: 70vw;
+    top: -20vw;
+    left: -15vw;
+    background: radial-gradient(ellipse at center,
+            rgba(200, 16, 46, 0.30) 0%,
+            rgba(200, 16, 46, 0.08) 50%,
+            transparent 70%);
+    animation: orb-drift-1 18s ease-in-out infinite;
+}
+
+/* Orb 2 — silver glow, bottom-right */
+.dash-bg__wave--2 {
+    width: 60vw;
+    height: 60vw;
+    bottom: -15vw;
+    right: -10vw;
+    background: radial-gradient(ellipse at center,
+            rgba(180, 185, 200, 0.18) 0%,
+            rgba(180, 185, 200, 0.05) 55%,
+            transparent 75%);
+    animation: orb-drift-2 22s ease-in-out infinite;
+    animation-delay: -6s;
+}
+
+/* Orb 3 — deep red, center-right, smaller */
+.dash-bg__wave--3 {
+    width: 45vw;
+    height: 45vw;
+    top: 30%;
+    right: 8%;
+    background: radial-gradient(ellipse at center,
+            rgba(160, 10, 36, 0.22) 0%,
+            rgba(160, 10, 36, 0.06) 50%,
+            transparent 72%);
+    animation: orb-drift-3 14s ease-in-out infinite;
+    animation-delay: -4s;
+}
+
+/* Orb 4 — warm gray accent, bottom-left */
+.dash-bg__wave--4 {
+    width: 50vw;
+    height: 50vw;
+    bottom: 10%;
+    left: 5%;
+    background: radial-gradient(ellipse at center,
+            rgba(120, 120, 140, 0.14) 0%,
+            rgba(120, 120, 140, 0.04) 55%,
+            transparent 75%);
+    animation: orb-drift-4 26s ease-in-out infinite;
+    animation-delay: -10s;
+}
+
+@keyframes orb-drift-1 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(4vw, 5vh) scale(1.08);
+    }
+
+    66% {
+        transform: translate(-2vw, 8vh) scale(0.95);
+    }
+}
+
+@keyframes orb-drift-2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    40% {
+        transform: translate(-5vw, -4vh) scale(1.10);
+    }
+
+    70% {
+        transform: translate(2vw, -7vh) scale(0.97);
+    }
+}
+
+@keyframes orb-drift-3 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    50% {
+        transform: translate(3vw, -6vh) scale(1.12);
+    }
+}
+
+@keyframes orb-drift-4 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    45% {
+        transform: translate(-3vw, 4vh) scale(1.06);
+    }
+
+    80% {
+        transform: translate(2vw, 6vh) scale(0.96);
+    }
+}
+
+/* ── Topbar ── */
+.topbar {
+    background: rgba(20, 20, 25, 0.75);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 32px rgba(0, 0, 0, 0.4);
+}
+
+.topbar__left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.topbar__mark {
+    width: 34px;
+    height: 34px;
+    background: var(--red);
+    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+.topbar__logo {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.topbar__sep {
+    width: 1px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.topbar__title {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #f0f0f0;
+}
+
+.topbar__sub {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 400;
+    margin-top: 1px;
+}
+
+.topbar__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.topbar__pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #e0e0e0;
+    letter-spacing: 0.06em;
+}
+
+.pill-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--safe);
+    animation: pulse-dot 2.5s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.pill-dot--orange {
+    background: var(--warn);
+}
+
+.pill-dot--red {
+    background: var(--red);
+}
+
+@keyframes pulse-dot {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .55;
+    }
+}
+
+.topbar__ts {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* ── Page inner ── */
+.dashboard__inner {
+    flex: 1;
+    padding: 16px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Rows ── */
+.dashboard__row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 14px;
+    align-items: start;
+}
+
+.dashboard__row--bottom {
+    grid-template-columns: 1fr 1.1fr;
+}
+
+/* ── Footer ── */
+.dashboard__footer {
+    background: rgba(20, 20, 25, 0.70);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 9px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    font-family: var(--mono);
+    color: rgba(255, 255, 255, 0.35);
+    position: relative;
+    z-index: 1;
+}
+
+.footer__brand {
+    font-weight: 700;
+    color: var(--red);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 860px) {
+
+    .dashboard__row,
+    .dashboard__row--bottom {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard__inner {
+        padding: 12px 14px;
+    }
+}

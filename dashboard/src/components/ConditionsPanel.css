@@ -1,0 +1,77 @@
+.cp2-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cp2-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: var(--r-sm);
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background .2s, border-color .25s;
+}
+
+.cp2-row--alert {
+    background: rgba(200, 16, 46, 0.12);
+    border-color: rgba(200, 16, 46, 0.28);
+}
+
+.cp2-row--positive {
+    background: rgba(22, 163, 74, 0.10);
+    border-color: rgba(22, 163, 74, 0.20);
+}
+
+.cp2-row__info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.cp2-row__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.80);
+}
+
+.cp2-row__sub {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 500;
+    font-family: var(--mono);
+}
+
+.cp2-row__value {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.90);
+    white-space: nowrap;
+}
+
+/* ── Note box ── */
+.cp2-note {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    background: rgba(0, 0, 0, 0.30);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+}
+
+.cp2-note__icon {
+    color: rgba(255, 255, 255, 0.40);
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.cp2-note__text {
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.50);
+    line-height: 1.5;
+}

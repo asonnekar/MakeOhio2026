@@ -1,0 +1,221 @@
+.banner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 24px;
+    background: rgba(18, 18, 22, 0.80);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--r-lg);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+    transition: border-color .4s, box-shadow .4s, background .4s;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Color-coded left bar */
+.banner::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+}
+
+.banner--safe::before {
+    background: var(--safe);
+}
+
+.banner--stressed::before {
+    background: var(--warn);
+}
+
+.banner--overload::before {
+    background: var(--red);
+}
+
+/* Subtle tint for overload */
+.banner--overload {
+    background: rgba(30, 10, 14, 0.85);
+    border-color: rgba(200, 16, 46, 0.35);
+    animation: ol-ring 2s ease-in-out infinite;
+}
+
+@keyframes ol-ring {
+
+    0%,
+    100% {
+        box-shadow: var(--shadow-sm);
+    }
+
+    50% {
+        box-shadow: 0 0 0 3px rgba(200, 16, 46, .14), var(--shadow-md);
+    }
+}
+
+/* ── Icon ── */
+.banner__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.banner__icon--safe {
+    color: var(--safe);
+}
+
+.banner__icon--stressed {
+    color: var(--warn);
+}
+
+.banner__icon--overload {
+    color: var(--red);
+}
+
+/* Checkmark */
+.banner__icon--safe::before,
+.banner__icon--safe::after {
+    content: '';
+    position: absolute;
+    background: var(--safe);
+    border-radius: 2px;
+}
+
+.banner__icon--safe::before {
+    width: 3px;
+    height: 14px;
+    top: 50%;
+    left: 56%;
+    transform: translate(-50%, -50%) rotate(-45deg) translateY(3px);
+}
+
+.banner__icon--safe::after {
+    width: 3px;
+    height: 8px;
+    top: 50%;
+    left: 38%;
+    transform: translate(-50%, -50%) rotate(45deg) translateY(2px);
+}
+
+/* Dash */
+.banner__icon--stressed::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 3px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--warn);
+    border-radius: 2px;
+}
+
+/* X */
+.banner__icon--overload::before,
+.banner__icon--overload::after {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 3px;
+    top: 50%;
+    left: 50%;
+    background: var(--red);
+    border-radius: 2px;
+}
+
+.banner__icon--overload::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.banner__icon--overload::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* ── Body text ── */
+.banner__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.banner__eyebrow {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.38);
+    margin-bottom: 3px;
+}
+
+.banner__label {
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.banner__status--safe {
+    color: var(--safe);
+}
+
+.banner__status--stressed {
+    color: var(--warn);
+}
+
+.banner__status--overload {
+    color: var(--red);
+}
+
+.banner__tagline {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 400;
+}
+
+/* ── 3-dot severity indicators ── */
+.banner__indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+    flex-shrink: 0;
+    padding-right: 4px;
+}
+
+.banner__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    transition: background .4s;
+}
+
+.banner__dot--active.banner__dot--safe {
+    background: var(--safe);
+}
+
+.banner__dot--active.banner__dot--stressed {
+    background: var(--warn);
+}
+
+.banner__dot--active.banner__dot--overload {
+    background: var(--red);
+    animation: dot-blink 1s ease-in-out infinite;
+}
+
+@keyframes dot-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .3;
+    }
+}

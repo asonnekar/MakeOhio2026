@@ -1,0 +1,294 @@
+/* ============================================================
+   SmartLine Guardian — AEP Design System
+   White · Red · Gray — Full Layout
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ── Whites & Grays ── */
+  --white: #ffffff;
+  --gray-50: #f9f9f9;
+  --gray-100: #f3f3f3;
+  --gray-150: #ebebeb;
+  --gray-200: #e0e0e0;
+  --gray-300: #c8c8c8;
+  --gray-400: #a0a0a0;
+  --gray-500: #737373;
+  --gray-600: #545454;
+  --gray-700: #3a3a3a;
+  --gray-800: #242424;
+  --gray-900: #121212;
+
+  /* ── AEP Reds ── */
+  --red: #c8102e;
+  /* AEP brand red */
+  --red-dark: #9e0c23;
+  --red-light: #e8294a;
+  --red-pale: #fdf0f2;
+  --red-muted: rgba(200, 16, 46, 0.10);
+  --red-border: rgba(200, 16, 46, 0.25);
+
+  /* ── Status ── */
+  --safe: #16a34a;
+  --safe-bg: #f0fdf4;
+  --safe-border: #bbf7d0;
+  --warn: #d97706;
+  --warn-bg: #fffbeb;
+  --warn-border: #fde68a;
+  --danger: var(--red);
+  --danger-bg: var(--red-pale);
+  --danger-border: var(--red-border);
+
+  /* ── Radii ── */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.10), 0 4px 8px rgba(0, 0, 0, 0.06);
+
+  /* ── Fonts ── */
+  --font: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  background: #0d0d10;
+  color: #e8e8ec;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scrollbar hidden globally */
+::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* Registers --border-angle as a natively animatable CSS property */
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes border-spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+/* ── Card ── */
+.card {
+  background: rgba(22, 22, 28, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.45);
+  position: relative;
+  transition: box-shadow 200ms ease;
+}
+
+/* Static subtle border when not hovered */
+/* Static border removed — dark theme needs no outline at rest */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.0);
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 200ms ease;
+}
+
+/* Animated gradient border — spins in the 3px border ring */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: calc(var(--r-lg) + 1.5px);
+  padding: 2.5px;
+  background: conic-gradient(from var(--border-angle),
+      transparent 0%,
+      transparent 25%,
+      rgba(200, 16, 46, 0.5) 40%,
+      rgba(200, 16, 46, 1.0) 50%,
+      rgba(200, 16, 46, 0.5) 60%,
+      transparent 75%,
+      transparent 100%);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+  z-index: 11;
+  animation: border-spin 7s linear infinite;
+  animation-play-state: paused;
+  /* glow follows the arc */
+  filter: drop-shadow(0 0 6px rgba(200, 16, 46, 0.9)) drop-shadow(0 0 14px rgba(200, 16, 46, 0.5));
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* On hover: hide the static border, show + start the spinner */
+.card:hover::after {
+  opacity: 0;
+}
+
+.card:hover::before {
+  opacity: 0.70;
+  animation-play-state: running;
+}
+
+
+
+.card__head {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.card__title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.card__title-dot {
+  width: 7px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+
+.card__body {
+  padding: 18px;
+}
+
+/* ── Tag / Badge ── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.07em;
+  padding: 3px 9px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tag--neutral {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tag--warn {
+  background: rgba(200, 16, 46, 0.08);
+  color: var(--red);
+  border: 1px solid var(--red-border);
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1
+  }
+
+  50% {
+    opacity: .45
+  }
+}
+
+/* ── Divider ── */
+hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* ── Loading ── */
+.loading-screen {
+  height: 100vh;
+  background: #0d0d10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.loading-screen__spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255, 255, 255, 0.10);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-screen__text {
+  font-size: 14px;
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+.loading-screen__hint {
+  font-size: 12px;
+  color: var(--gray-300);
+  font-weight: 400;
+  max-width: 380px;
+  text-align: center;
+  line-height: 1.6;
+}
