@@ -7,7 +7,6 @@ import {
     Tooltip,
     ReferenceLine,
     CartesianGrid,
-    Legend,
 } from "recharts";
 import type { HistoryPoint, SensorData } from "../types";
 import "./TempTrendChart.css";
@@ -25,8 +24,14 @@ function CustomTooltip({ active, payload, label }: any) {
             {payload.map((p: any) => (
                 <div key={p.dataKey} className="chart-tooltip__row">
                     <span className="chart-tooltip__dot" style={{ background: p.color }} />
-                    <span className="chart-tooltip__key">{p.dataKey === "Tc" ? "Conductor" : "Ambient"}</span>
-                    <span className="chart-tooltip__val">{p.value.toFixed(1)} °C</span>
+                    <span className="chart-tooltip__key">
+                        {p.dataKey === "Tc" ? "Conductor" : p.dataKey === "Ta" ? "Ambient" : "Sag"}
+                    </span>
+                    <span className="chart-tooltip__val">
+                        {p.dataKey === "sagMeters" && p.value != null
+                            ? `${p.value.toFixed(3)} m`
+                            : typeof p.value === "number" ? `${p.value.toFixed(1)} °C` : "—"}
+                    </span>
                 </div>
             ))}
         </div>
@@ -51,8 +56,8 @@ export function TempTrendChart({ history, data }: Props) {
                     Temperature Trend
                 </div>
                 <div className="trend-chart__legend">
-                    <span className="trend-chart__key trend-chart__key--tc">Conductor Tc</span>
-                    <span className="trend-chart__key trend-chart__key--ta">Ambient Ta</span>
+                    <span className="trend-chart__key trend-chart__key--tc">Line Temp</span>
+                    <span className="trend-chart__key trend-chart__key--ta">Environmental Temp</span>
                 </div>
             </div>
             <div className="card__body trend-chart__body">
@@ -120,8 +125,8 @@ export function TempTrendChart({ history, data }: Props) {
                     </ResponsiveContainer>
                 )}
                 <div className="trend-chart__footer">
-                    <span>ΔT = {(data.Tc - data.Ta) > 0 ? "+" : ""}{(data.Tc - data.Ta).toFixed(1)} °C above ambient</span>
-                    <span>Last: Tc {data.Tc.toFixed(1)} °C · Ta {data.Ta.toFixed(1)} °C</span>
+                    <span>ΔT = {(data.Tc - data.Ta) >= 0 ? "+" : ""}{(data.Tc - data.Ta).toFixed(1)} °C above ambient</span>
+                    <span>Tc {data.Tc.toFixed(1)} °C · Ta {data.Ta.toFixed(1)} °C · Sag {data.sagMeters != null ? `${data.sagMeters.toFixed(3)} m` : "—"}</span>
                 </div>
             </div>
         </div>

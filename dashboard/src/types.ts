@@ -9,6 +9,9 @@ export interface SensorData {
   status: LineStatus;
   fanOn: boolean;
   timestamp: string;
+  riskScore?: number;
+  effectiveConductorTemp?: number;
+  sagMeters?: number | null;
 }
 
 export interface HistoryPoint {
@@ -18,6 +21,7 @@ export interface HistoryPoint {
   Ta: number;
   I_actual: number;
   I_safe: number;
+  sagMeters?: number | null;
 }
 
 export interface LogEntry {

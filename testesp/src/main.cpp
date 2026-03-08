@@ -6,24 +6,43 @@
 #define LED_BUILTIN 2
 #endif
 
+// ---- DHT configuration ----
 #define DHTPIN 14
 #define DHTTYPE DHT11
-
 DHT dht(DHTPIN, DHTTYPE);
 
+// ---- Thermistor ADC pin ----
 const int THERM_PIN = 34;
 
+// ---- Thermistor parameters ----
 const float SERIES_RESISTOR = 10000.0f;
 const float NOMINAL_RESISTANCE = 10000.0f;
-const float NOMINAL_TEMPERATURE = 25.0f;
+const float NOMINAL_TEMPERATURE = 25.0f; // °C
 const float BETA_COEFFICIENT = 3950.0f;
 const float ADC_MAX = 4095.0f;
 const float VCC = 3.3f;
 
+// ---- Status LEDs ----
 const int LED_SAFE = 25;
 const int LED_STRESS = 26;
 const int LED_OVERLOAD = 27;
 
+// ---- Sag model constants (tune for your demo) ----
+// Span length between supports (meters)
+const float SAG_SPAN_L = 30.0f;
+// Reference conductor temperature (°C) when sag was measured
+const float SAG_T0 = 25.0f;
+// Baseline sag at T0 (meters)
+const float SAG_S0 = 0.50f;
+// Linear thermal expansion coefficient (per °C)
+const float SAG_ALPHA = 19e-6f;
+
+// Sag risk calibration: when sag exceeds SAG_START it starts adding risk,
+// and at SAG_MAX it contributes full sag risk.
+const float SAG_START = SAG_S0 + 0.05f; // m
+const float SAG_MAX = SAG_S0 + 0.25f;   // m
+
+// ---- Status / data types ----
 enum Status { STATUS_SAFE, STATUS_STRESSED, STATUS_OVERLOAD };
 
 struct SensorReadings {
@@ -37,7 +56,10 @@ struct StatusDecision {
   Status status;
   float riskScore;
   float effectiveConductorTempC;
+  float sagMeters;
 };
+
+// ---------- Helper functions ----------
 
 float clamp01(float value) {
   if (value < 0.0f)
@@ -65,10 +87,11 @@ float readThermistorC(int adc) {
   const float rTherm = SERIES_RESISTOR * (VCC / voltage - 1.0f);
   if (rTherm <= 0.0f)
     return NAN;
+
   const float t0 = NOMINAL_TEMPERATURE + 273.15f;
   const float invT = (1.0f / t0) + (1.0f / BETA_COEFFICIENT) *
                                        log(rTherm / NOMINAL_RESISTANCE);
-  return (1.0f / invT) - 273.15f;
+  return (1.0f / invT) - 273.15f; // °C
 }
 
 SensorReadings readSensors() {
@@ -87,12 +110,26 @@ float computeHumidityCoolingFactor(float humidityPercent) {
   return 1.0f + normalizedHumidity * 0.06f;
 }
 
+// Predicted sag from conductor temperature using a parabolic approximation:
+// s(T) ≈ s0 + α·ΔT·L² / (8·h0), with h0 ≈ s0 for a level span.
+float predictSagMeters(float conductorTempC) {
+  if (isnan(conductorTempC))
+    return NAN;
+  const float dT = conductorTempC - SAG_T0;
+  const float h0 = SAG_S0;
+  const float dS = (SAG_ALPHA * dT * SAG_SPAN_L * SAG_SPAN_L) / (8.0f * h0);
+  return SAG_S0 + dS;
+}
+
+// ---------- Risk + status ----------
+
 StatusDecision evaluateStatus(const SensorReadings &readings) {
-  StatusDecision decision = {STATUS_OVERLOAD, 100.0f, NAN};
+  StatusDecision decision = {STATUS_OVERLOAD, 100.0f, NAN, NAN};
 
   if (isnan(readings.conductorTempC) || isnan(readings.ambientTempC) ||
-      isnan(readings.humidityPercent))
+      isnan(readings.humidityPercent)) {
     return decision;
+  }
 
   const float humidityCoolingFactor =
       computeHumidityCoolingFactor(readings.humidityPercent);
@@ -100,18 +137,24 @@ StatusDecision evaluateStatus(const SensorReadings &readings) {
       max(0.0f, readings.conductorTempC - readings.ambientTempC);
   const float effectiveConductorTempC =
       readings.ambientTempC + conductorRiseC / humidityCoolingFactor;
-  // ── Risk scoring recalibrated for demo hardware ─────────────────────────
-  // Observed range: Tc 15–37 °C, Ta ~27 °C, rise up to ~10 °C.
-  // conductorScore: starts at 28 °C effective, maxes at 40 °C
-  // ambientScore:   starts at 24 °C, maxes at 32 °C
-  // thermalRise:    starts at 3 °C rise above ambient, maxes at 13 °C
+
+  const float sagMeters = predictSagMeters(readings.conductorTempC);
+
+  // Base scores (0–1)
   const float conductorScore =
       clamp01((effectiveConductorTempC - 28.0f) / 12.0f);
   const float ambientScore = clamp01((readings.ambientTempC - 24.0f) / 8.0f);
   const float thermalRiseScore = clamp01((conductorRiseC - 3.0f) / 10.0f);
 
-  float riskScore = 100.0f * (conductorScore * 0.60f + ambientScore * 0.15f +
-                              thermalRiseScore * 0.25f);
+  // Sag score (0–1) between SAG_START and SAG_MAX
+  float sagScore = 0.0f;
+  if (!isnan(sagMeters)) {
+    sagScore = clamp01((sagMeters - SAG_START) / (SAG_MAX - SAG_START));
+  }
+
+  // New risk weighting: sag contributes directly
+  float riskScore = 100.0f * (conductorScore * 0.50f + ambientScore * 0.10f +
+                              thermalRiseScore * 0.25f + sagScore * 0.15f);
 
   if (readings.humidityPercent < 35.0f)
     riskScore += 3.0f;
@@ -120,17 +163,8 @@ StatusDecision evaluateStatus(const SensorReadings &readings) {
   if (riskScore < 0.0f)
     riskScore = 0.0f;
 
-  // ── Hysteresis thresholds ─────────────────────────────────────────────────
-  // Each state has separate ENTER (higher) and EXIT (lower) thresholds so the
-  // status does not flip-flop at the boundary.
-  //
-  // Entering STRESSED:  Tc ≥ 32 °C  OR  rise ≥  6 °C  OR  risk ≥ 32
-  // Exiting  STRESSED:  Tc <  29 °C AND  rise <  3.5°C AND  risk <  24
-  //
-  // Entering OVERLOAD:  Tc ≥ 37 °C  OR  rise ≥ 10.5°C OR  risk ≥ 66
-  // Exiting  OVERLOAD:  Tc <  33 °C AND  rise <  7.5°C AND  risk <  55
-
-  static Status prevStatus = STATUS_SAFE; // remembered across loop() calls
+  // Hysteresis thresholds (unchanged)
+  static Status prevStatus = STATUS_SAFE;
 
   const bool enterStressed =
       (readings.conductorTempC >= 32.0f || effectiveConductorTempC >= 30.5f ||
@@ -164,16 +198,17 @@ StatusDecision evaluateStatus(const SensorReadings &readings) {
   case STATUS_OVERLOAD:
     if (exitOverload)
       prevStatus = STATUS_STRESSED;
-    // (require another exitStressed before going all the way back to SAFE)
     break;
   }
 
   decision.status = prevStatus;
-
   decision.riskScore = riskScore;
   decision.effectiveConductorTempC = effectiveConductorTempC;
+  decision.sagMeters = sagMeters;
   return decision;
 }
+
+// ---------- UI helpers ----------
 
 const char *statusToText(Status status) {
   switch (status) {
@@ -192,6 +227,8 @@ void setStatusLED(Status status) {
   digitalWrite(LED_OVERLOAD, status == STATUS_OVERLOAD ? HIGH : LOW);
 }
 
+// ---------- Arduino setup/loop ----------
+
 void setup() {
   Serial.begin(115200);
   delay(1000);
@@ -207,7 +244,7 @@ void setup() {
   dht.begin();
 
   Serial.println("Conductor monitor starting...");
-  Serial.println("Status uses conductor temp, ambient temp, and humidity.");
+  Serial.println("Using temp, humidity, and predicted sag in risk score.");
 }
 
 void loop() {
@@ -239,6 +276,13 @@ void loop() {
   Serial.print(readings.humidityPercent, 1);
   Serial.print("%  EffectiveC: ");
   Serial.print(decision.effectiveConductorTempC, 2);
+  Serial.print("  Sag: ");
+  if (isnan(decision.sagMeters)) {
+    Serial.print("NaN");
+  } else {
+    Serial.print(decision.sagMeters, 3);
+    Serial.print(" m");
+  }
   Serial.print("  Risk: ");
   Serial.print(decision.riskScore, 1);
   Serial.print("  STATUS: ");

@@ -6,10 +6,10 @@ interface Props { data: SensorData; }
 function buildExplanation(data: SensorData): string {
     const parts: string[] = [];
     if (data.Ta > 30) parts.push("High environmental temp reduces safe current rating");
-    if (!data.fanOn) parts.push("No wind/fan cooling further lowers the limit");
-    if (data.fanOn) parts.push("Active fan cooling raises the thermal rating");
+
     if (data.humidity > 70) parts.push("Elevated humidity may affect sensor accuracy");
     if (data.Tc > 55) parts.push("Line temperature is elevated");
+    if (data.sagMeters != null && data.sagMeters > 0.55) parts.push("Predicted sag is elevated — clearance may be reduced");
     if (parts.length === 0) parts.push("All conditions are nominal");
     return parts.join(". ") + ".";
 }
@@ -48,9 +48,10 @@ export function ConditionsPanel({ data }: Props) {
                         value={`${data.Ta.toFixed(1)} °C`} alert={data.Ta > 32} />
                     <Row label="Humidity" sub="DHT11"
                         value={`${data.humidity.toFixed(0)} %`} alert={data.humidity > 75} />
-                    <Row label="Wind / Fan" sub="Cooling assist"
-                        value={data.fanOn ? "ON — Active" : "OFF — None"}
-                        positive={data.fanOn} alert={!data.fanOn} />
+
+                    <Row label="Predicted Sag" sub="Thermal model"
+                        value={data.sagMeters != null ? `${data.sagMeters.toFixed(3)} m` : "—"}
+                        alert={data.sagMeters != null && data.sagMeters > 0.55} />
                     <Row label="Rated Limit" sub="I_safe"
                         value={`${data.I_safe.toFixed(1)} A`} />
                 </div>

@@ -237,6 +237,12 @@ export function CurrentPanel({ data, history }: Props) {
                             {data.Tc.toFixed(1)} °C
                         </span>
                     </div>
+                    <div className="cp-meta__item">
+                        <span className="cp-meta__label">Predicted Sag</span>
+                        <span className="cp-meta__val" style={{ color: data.sagMeters != null && data.sagMeters > 0.55 ? "var(--warn)" : "inherit" }}>
+                            {data.sagMeters != null ? `${data.sagMeters.toFixed(3)} m` : "—"}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="cp-estimates">

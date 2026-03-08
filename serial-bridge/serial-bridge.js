@@ -57,6 +57,8 @@ function parseLine(line) {
     const H = extract(/H:\s*([\d.]+)/);
     const effC = extract(/EffectiveC:\s*([\d.]+)/);
     const risk = extract(/Risk:\s*([\d.]+)/);
+    const sagM = line.match(/Sag:\s*([\d.]+)\s*m/);
+    const sag = sagM ? parseFloat(sagM[1]) : null;
     const statusM = line.match(/STATUS:\s*(SAFE|STRESSED|OVERLOAD)/);
     const status = statusM ? statusM[1] : null;
 
@@ -107,6 +109,7 @@ function parseLine(line) {
         fanOn,
         riskScore: r,
         effectiveConductorTemp: effC,
+        sagMeters: sag !== null ? parseFloat(sag.toFixed(3)) : null,
         timestamp: new Date().toISOString(),
     };
 }
