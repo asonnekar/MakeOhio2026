@@ -37,7 +37,7 @@ export function useStatusPoller() {
         });
         setHistory(prev => [
             ...prev,
-            { t: timeLabel, Tc: d.Tc, Ta: d.Ta, I_actual: d.I_actual, I_safe: d.I_safe },
+            { t: timeLabel, ts: Date.now(), Tc: d.Tc, Ta: d.Ta, I_actual: d.I_actual, I_safe: d.I_safe },
         ].slice(-MAX_HISTORY));
 
         // Status change log

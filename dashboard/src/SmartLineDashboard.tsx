@@ -67,7 +67,7 @@ export function SmartLineDashboard() {
 
                 {/* Row 1: Current gauge (dominant) + Temp trend */}
                 <div className="dashboard__row">
-                    <CurrentPanel data={data} />
+                    <CurrentPanel data={data} history={history} />
                     <TempTrendChart history={history} data={data} />
                 </div>
 

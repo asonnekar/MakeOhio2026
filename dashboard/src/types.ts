@@ -13,6 +13,7 @@ export interface SensorData {
 
 export interface HistoryPoint {
   t: string;      // short time label e.g. "21:30"
+  ts: number;
   Tc: number;
   Ta: number;
   I_actual: number;
