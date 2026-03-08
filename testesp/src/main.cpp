@@ -1,9 +1,16 @@
 #include <Arduino.h>
 #include <math.h>
+#include <DHT.h>
+
 
 #ifndef LED_BUILTIN
   #define LED_BUILTIN 2  
 #endif
+
+#define DHTPIN 14       
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
+
 
 const int THERM_PIN = 34;
 
@@ -47,6 +54,7 @@ void setup() {
   pinMode(LED_SAFE, OUTPUT);
   pinMode(LED_STRESS, OUTPUT);
   pinMode(LED_OVERLOAD, OUTPUT);
+  dht.begin();  
 
 }
 void setStatusLED(const String &status) {
@@ -66,21 +74,35 @@ void setStatusLED(const String &status) {
 }
 
 void loop() {
-  int raw = analogRead(THERM_PIN);
+  float Tc = readThermistorC();        // conductor temperature
+  float Ta = dht.readTemperature();    // ambient temperature (°C)
+  float H  = dht.readHumidity();       // humidity (optional)
+
+  if (isnan(Ta) || isnan(H)) {
+    Serial.println("DHT read failed");
+    return;
+  }
+
+  // Example: use Ta to adjust safe threshold
   String status;
-  if (raw < 2000) {
+  if (Tc < 35 + (Ta - 25)) {
     status = "SAFE";
-  } else if (raw < 3000) {
+  } else if (Tc < 60 + (Ta - 25)) {
     status = "STRESSED";
   } else {
     status = "OVERLOAD";
   }
+
   setStatusLED(status);
-  Serial.print("Value: ");
-  Serial.print(raw);
-  Serial.print("  STATUS: ");
-  Serial.println(status);
-  delay(500);
+
+  Serial.print("Tc: "); Serial.print(Tc);
+  Serial.print("  Ta: "); Serial.print(Ta);
+  Serial.print("  H: "); Serial.print(H);
+  Serial.print("  STATUS: "); Serial.println(status);
+
+  delay(2000);  // DHT11 needs ~2s between reads [web:99][web:108]
 
 }
+
+
 
